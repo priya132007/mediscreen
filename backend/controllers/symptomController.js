@@ -1,0 +1,5 @@
+import axios from "axios";
+import Symptom from "../models/Symptom.js";
+import { patientForUser, required } from "../utils.js";
+export async function createSymptom(req, res) { const patient = await patientForUser(req.user._id); if (!patient) return res.status(404).json({ error: "Patient profile not found" }); const description = required(req.body.description, "description"); let analysis = null; if (process.env.AI_SERVICE_URL) { try { analysis = (await axios.post(`${process.env.AI_SERVICE_URL}/analyze`, { text: description, symptoms: req.body.answers })).data; } catch { analysis = null; } } const symptom = await Symptom.create({ patient: patient._id, description, severity: req.body.severity, duration: req.body.duration, answers: req.body.answers, aiResult: analysis?._id }); res.status(201).json({ symptom, analysis }); }
+export async function listSymptoms(req, res) { const patient = await patientForUser(req.user._id); if (!patient) return res.status(404).json({ error: "Patient profile not found" }); res.json(await Symptom.find({ patient: patient._id }).sort({ createdAt: -1 })); }

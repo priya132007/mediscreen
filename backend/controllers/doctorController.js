@@ -1,0 +1,9 @@
+import Doctor from "../models/Doctor.js";
+import Patient from "../models/Patient.js";
+import User from "../models/User.js";
+import { required } from "../utils.js";
+export async function getProfile(req, res) { const doctor = await Doctor.findOne({ user: req.user._id }).populate("user", "name email phone"); if (!doctor) return res.status(404).json({ error: "Doctor profile not found" }); res.json(doctor); }
+export async function updateProfile(req, res) { const doctor = await Doctor.findOne({ user: req.user._id }); if (!doctor) return res.status(404).json({ error: "Doctor profile not found" }); for (const key of ["licenseNumber", "department", "hospital", "specializations", "active"]) if (req.body[key] !== undefined) doctor[key] = req.body[key]; await doctor.save(); if (req.body.name || req.body.phone) await User.findByIdAndUpdate(req.user._id, { ...(req.body.name && { name: req.body.name }), ...(req.body.phone && { phone: req.body.phone }) }); res.json(doctor); }
+export async function createDoctor(req, res) { const { name, email, password, licenseNumber, department, hospital, specializations } = req.body; required(name, "name"); required(email, "email"); required(password, "password"); const bcrypt = (await import("bcryptjs")).default; if (await User.exists({ email: email.toLowerCase() })) return res.status(409).json({ error: "Email already registered" }); const user = await User.create({ name, email: email.toLowerCase(), passwordHash: await bcrypt.hash(password, 12), role: "DOCTOR" }); const doctor = await Doctor.create({ user: user._id, licenseNumber, department, hospital, specializations }); res.status(201).json(doctor);
+}
+export async function assignedPatients(req, res) { res.json(await Patient.find({ assignedDoctor: req.user._id }).populate("user", "name email phone")); }

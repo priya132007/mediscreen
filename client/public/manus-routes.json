@@ -1,0 +1,13 @@
+{
+  "routes": [
+    { "path": "/", "title": "MediScreen AI" },
+    { "path": "/patient", "title": "Patient overview" },
+    { "path": "/patient/intake", "title": "Patient intake" },
+    { "path": "/patient/symptoms", "title": "Symptom check-in" },
+    { "path": "/patient/documents", "title": "Medical documents" },
+    { "path": "/doctor", "title": "Doctor dashboard" },
+    { "path": "/doctor/patients/:patientId", "title": "Patient summary" },
+    { "path": "/doctor/feedback", "title": "Doctor feedback" },
+    { "path": "/404", "title": "Page not found" }
+  ]
+}
